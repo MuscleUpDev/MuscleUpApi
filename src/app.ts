@@ -1,12 +1,13 @@
 import express from 'express';
 import { UserController } from './controllers/userController';
-
+const cors = require('cors');
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 app.post('/register', UserController.register);
-app.get('/login', UserController.login);
+app.post('/login', UserController.login);
 
 
 const port = 3000;
