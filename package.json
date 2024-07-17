@@ -2,7 +2,7 @@
   "name": "muscleupapi",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm i && rm -rf dist/* && npx tsc && node dist/app.js"
