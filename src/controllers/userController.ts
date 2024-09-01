@@ -1,12 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import db from '../config/db';
 import { User } from '../models/user';
 import { RowDataPacket } from 'mysql2';
 
 const saltRounds = 10;
-const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export class UserController {
   static async register(req: Request, res: Response) {
@@ -16,6 +14,8 @@ export class UserController {
       if (!password) {
         throw new Error('Password is required');
       }
+
+      // TODO : Chack if username already exist
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -43,17 +43,12 @@ export class UserController {
     const { username, password } = req.body;
     console.log(req.body)
 
-    console.log(username)
-    console.log(password)
-
     try {
       db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results: RowDataPacket[]) => {
         if (err) {
           console.error('Error logging in:', err);
           return res.status(500).json({ error: 'Internal server error' });
         }
-  
-        console.log('Query results:', results);
   
         if (results.length === 0) {
           console.log('User not found');
@@ -74,9 +69,9 @@ export class UserController {
           return res.status(401).json({ error: 'Username or password incorrect' });
         }
   
-        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
+        req.session.userId = user.id;
   
-        res.status(200).json({ message: 'Login successful', token });
+        res.status(200).json({ message: 'Login successful' });
       });
     } catch (error) {
       console.error('Error logging in:', error);
@@ -85,6 +80,12 @@ export class UserController {
   }
 
   static logout(req: Request, res: Response) {
-    res.status(200).json({ message: 'Logout successful' });
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Error during logout:', err);
+        return res.status(500).json({ error: 'Error during logout' });
+      }
+      res.status(200).json({ message: 'Logout successful' });
+    });
   }
 }
