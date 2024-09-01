@@ -71,7 +71,7 @@ export class UserController {
   
         req.session.userId = user.id;
   
-        res.status(200).json({ message: 'Login successful' });
+        res.status(200).json({ message: 'Login successful', userId: user.id});
       });
     } catch (error) {
       console.error('Error logging in:', error);
